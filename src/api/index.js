@@ -11,6 +11,7 @@ const API = {
   
   // 获取用户歌单
   getPlaList: '/user/playlist'
+  
 }
 
 // 可选的错误
