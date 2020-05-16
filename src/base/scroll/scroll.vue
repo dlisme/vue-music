@@ -50,6 +50,14 @@ export default {
     refresh() {
       this.scroll && this.scroll.refresh();
     },
+
+    // 歌手页 滚动到某处
+      scrollTo() {
+        this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)
+      },
+      scrollToElement() {
+        this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
+      }
   },
   watch: {
     data() {
