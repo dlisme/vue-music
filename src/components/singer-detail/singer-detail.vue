@@ -66,14 +66,6 @@ export default {
 </script>
 
 <style scoped lang="stylus">
-// .singer-detail
-//   position fixed
-//   top 0
-//   left 0
-//   right 0
-//   bottom 0
-//   background #ccc
-//   z-index 999
 
 .slide-enter-active, .slide-leave-active
   transition: all 0.3s
