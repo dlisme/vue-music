@@ -1,9 +1,15 @@
 <template>
   <div class="player" v-show="playlist.length > 0">
-    <transition name="normal">
+    <transition
+      name="normal"
+      @enter="enter"
+      @after-enter="afterEnter"
+      @leave="leave"
+      @after-leave="afterLeave"
+    >
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
-          <img width="100%" height="100%" :src="currentSong.image"> 
+          <img width="100%" height="100%" :src="currentSong.image" />
         </div>
         <div class="top">
           <div class="back" @click="back">
@@ -16,7 +22,7 @@
           <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd">
-                <img class="image" :src="currentSong.image">
+                <img class="image" :src="currentSong.image" />
               </div>
             </div>
             <div class="playing-lyric-wrapper">
@@ -45,7 +51,7 @@
           </div>
           <div class="operators">
             <div class="icon i-left">
-              <i ></i>
+              <i></i>
             </div>
             <div class="icon i-left">
               <i class="icon-prev"></i>
@@ -66,7 +72,7 @@
     <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="open">
         <div class="icon">
-          <img width="40" height="40" :src="currentSong.image">
+          <img width="40" height="40" :src="currentSong.image" />
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
@@ -89,8 +95,8 @@
 
 <script type="text/ecmascript-6">
 import {mapGetters, mapMutations} from 'vuex'
-// import animations from 'create-keyframe-animation'
-// import {prefixStyle} from '@/common/js/dom'
+import animations from 'create-keyframe-animation'
+import {prefixStyle} from '@/common/js/dom'
 // import ProgressBar from '@/base/progress-bar/progress-bar'
 // import ProgressCircle from '@/base/progress-circle/progress-circle'
 // import {playMode} from '@/common/js/config'
@@ -99,6 +105,7 @@ import {mapGetters, mapMutations} from 'vuex'
 // import {playerMixin} from '@/common/js/mixin'
 // import Playlist from '@/components/playlist/playlist'
 
+const transform = prefixStyle('transform');
 
 export default {
   data() {
@@ -119,9 +126,74 @@ export default {
     back(){
       this.setFullScroll(false);
     },
+
     open(){
       this.setFullScroll(true);
     },
+
+    // cd飞入动画效果
+    // enter和leave支持两个参数，第一个参数是dom, 第二个参数是一个回调函数（当这个函数执行会跳到下一个钩子函数）
+    // 利用js创建cs3动画，用一个开源库create-keyframe-animation
+    enter(el, done){
+      const {x, y, scale} = this._getPosAndScale();
+      let animation = {
+        0: {
+          transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`
+        },
+        60: {
+          transform: `translate3d(0, 0, 0) scale(1.1)`
+        },
+        100: {
+          transform: `translate3d(0, 0, 0) scale(1)`
+        }
+      }
+      animations.registerAnimation( {
+        name: 'move',  // 动画名称
+        animation,    // 动画
+        presets: {    // 预设 动画
+          duration: 400,  // 动画间隔
+          easing: 'linear',   // 缓动  线性
+        }
+      })
+
+      // 运行动画
+      animations.runAnimation(this.$refs.cdWrapper, 'move', done);
+    },
+
+    afterEnter(){
+      animations.unregisterAnimation('move');
+      this.$refs.cdWrapper.style.animation = '';
+    },
+
+    leave(el, done){
+      this.$refs.cdWrapper.style.transition = 'all 0.4s';
+      const {x, y, scale} = this._getPosAndScale();
+      this.$refs.cdWrapper.style[transform] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+      this.$refs.cdWrapper.addEventListener('transitionend', done);
+    },
+
+    afterLeave(){
+      this.$refs.cdWrapper.style.transition = '';
+      this.$refs.cdWrapper.style[transform] = '';
+    },
+
+    // 获取位置及其缩放尺寸
+    _getPosAndScale(){
+      const targetWidth = 40;
+      const paddingLeft = 40;
+      const paddingBottom = 30;
+      const paddingTop = 80;
+      const width = window.innerWidth * 0.8;
+      const scale =  targetWidth / width;   // 初始的缩放比例
+      const x = -(window.innerWidth / 2 - paddingLeft);   // 初始的x坐标
+      const y = window.innerHeight - paddingTop - width / 2 - paddingBottom;  //初始的y坐标
+      return {
+        x,
+        y,
+        scale
+      }
+   },
+
     ...mapMutations({
       setFullScroll: 'SET_FULL_SCREEN'
     })
