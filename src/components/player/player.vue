@@ -21,7 +21,8 @@
         <div class="middle">
           <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="cdWrapper">
-              <div class="cd">
+              <!-- cd旋转效果 -->
+              <div class="cd" :class="cdCls">
                 <img class="image" :src="currentSong.image" />
               </div>
             </div>
@@ -51,16 +52,17 @@
           </div>
           <div class="operators">
             <div class="icon i-left">
-              <i></i>
+              <i :class="iconMode"></i>
             </div>
-            <div class="icon i-left">
-              <i class="icon-prev"></i>
+            <div class="icon i-left" :class="disableCls">
+              <i class="icon-prev" @click="prev"></i>
             </div>
-            <div class="icon i-center">
-              <i></i>
+            <div class="icon i-center" :class="disableCls">
+              <!-- 控制是否暂停播放的 -->
+              <i :class="playIcon" @click="togglePlaying"></i>
             </div>
-            <div class="icon i-right">
-              <i class="icon-next"></i>
+            <div class="icon i-right" :class="disableCls">
+              <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
               <i class="icon"></i>
@@ -72,7 +74,7 @@
     <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="open">
         <div class="icon">
-          <img width="40" height="40" :src="currentSong.image" />
+          <img width="40" height="40" :src="currentSong.image" :class="cdCls"/>
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
@@ -80,7 +82,7 @@
         </div>
         <div class="control">
           <progress-circle>
-            <i class="icon-mini"></i>
+            <i :class="miniIcon" @click.stop="togglePlaying"></i>
           </progress-circle>
         </div>
         <div class="control">
@@ -89,7 +91,10 @@
       </div>
     </transition>
     <!-- <playlist ref="playlist"></playlist> -->
-    <!-- <audio></audio> -->
+    <!-- 通过html中的audio标签实现播放 -->
+    <!-- canplay 歌曲加载到播放会派发一个事件canplay  -->
+    <!-- 当歌曲发生错误或请求不到会派发一个事件error -->
+    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error"></audio>
   </div>
 </template>
 
@@ -110,17 +115,54 @@ const transform = prefixStyle('transform');
 export default {
   data() {
     return {
-
+      songReady: false
     }
   },
   computed: {
+    // 播放状态按钮
+    playIcon(){
+      return this.playing ? 'icon-pause' : 'icon-play'
+    },
+    // 迷你播放器状态按钮
+    miniIcon(){
+      return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+    },
+
+    // cd旋转效果
+    cdCls(){
+      return this.playing ? 'play' : 'play pause'
+    },
     ...mapGetters([
       'fullScreen',
       'playlist',
-      'currentSong'
-    ])
+      'currentSong',
+      'playing',
+      'currentIndex'
+    ]),
+
+    // 如果产生错误，禁止用户点击
+    disableCls() {
+      return this.songReady ? '' : 'disable'
+    },
   },
   created() {
+  },
+  watch: {
+    currentSong() {
+      // audio标签有一个play方法
+      this.$nextTick(() => {
+        this.$refs.audio.play();
+      })
+    },
+
+    // 真正控制音乐播放器暂停
+    // play(播放)和pause(暂停)都是audio dom实例的方法
+    playing(newPlaying){
+      const audio = this.$refs.audio;
+      this.$nextTick(() => {  // 延时  回调里面执行
+        newPlaying ? audio.play() : audio.pause();
+      })
+    }
   },
   methods: {
     back(){
@@ -195,11 +237,65 @@ export default {
    },
 
     ...mapMutations({
-      setFullScroll: 'SET_FULL_SCREEN'
-    })
-  },
-  watch: {
+      setFullScroll: 'SET_FULL_SCREEN',
+      setPlayingState: 'SET_PLAYING_STATE',
+      setCurrentIndex: 'SET_CURRENT_INDEX'
+    }),
 
+    // 控制是否暂停播放  图标
+    togglePlaying(){
+      // 阻止快速点击报错，在歌曲还没ready，不允许点击
+      if(!this.songReady){
+        return
+      }
+      this.setPlayingState(!this.playing);
+    },
+
+    // 上一首
+    prev(){
+      // 阻止快速点击报错，在歌曲还没ready，不允许点击
+      if(!this.songReady){
+        return
+      }
+      let index = this.currentIndex - 1;
+      if(index === -1){
+        index = this.playlist.length - 1;
+      }
+      this.setCurrentIndex(index);
+      if(!this.playing){
+        this.togglePlaying();
+      }
+      this.songReady = false;
+    },
+
+    // 下一首
+    next(){
+      // 阻止快速点击报错，在歌曲还没ready，不允许点击
+      if(!this.songReady){
+        return
+      }
+      let index = this.currentIndex + 1;
+      if(index === this.playlist.length){
+        //  顺序播放
+        index = 0;
+      }
+      this.setCurrentIndex(index);
+      if(!this.playing){
+        this.togglePlaying();
+      }
+      this.songReady = false;
+    },
+
+    // 
+    ready(){
+      this.songReady = true;
+    },
+
+    // 如果用户切换遇到网络错误，url报错等问题。后续操作没法执行 error
+    // 既保证了正常使用，又防止用户快速点击，造成dom报错
+    error(){
+      this.songReady = true;
+    }
   },
   components: {
     // Playlist
@@ -282,7 +378,7 @@ export default {
             box-sizing: border-box
             border: 10px solid rgba(255, 255, 255, 0.1)
             border-radius: 50%
-            &.play
+            &.play               // cd旋转效果
               animation: rotate 20s linear infinite
             &.pause
               animation-play-state: paused
@@ -442,7 +538,7 @@ export default {
         left: 0
         top: 0
 
-@keyframes rotate
+@keyframes rotate     // cd旋转动画效果
   0%
     transform: rotate(0)
   100%
