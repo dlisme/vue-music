@@ -44,11 +44,14 @@
             <span class="dot"></span>
           </div>
           <div class="progress-wrapper">
-            <span class="time time-l"></span>
+            <!-- 歌曲当前播放的时间 -->
+            <span class="time time-l">{{format(currentTime)}}</span>
+            <!-- 歌曲进度条 -->
             <div class="progress-bar-wrapper">
-              <progress-bar></progress-bar>
+              <progress-bar :percent="percent"></progress-bar>
             </div>
-            <span class="time time-r"></span>
+            <!-- 歌曲播放总时间 -->
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
             <div class="icon i-left">
@@ -94,7 +97,8 @@
     <!-- 通过html中的audio标签实现播放 -->
     <!-- canplay 歌曲加载到播放会派发一个事件canplay  -->
     <!-- 当歌曲发生错误或请求不到会派发一个事件error -->
-    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error"></audio>
+    <!-- 歌曲播放的时候，audio标签会派发一个事件timeupdate -->
+    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
   </div>
 </template>
 
@@ -102,7 +106,7 @@
 import {mapGetters, mapMutations} from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixStyle} from '@/common/js/dom'
-// import ProgressBar from '@/base/progress-bar/progress-bar'
+import ProgressBar from '@/base/progress-bar/progress-bar'   //  progress-bar 进度条
 // import ProgressCircle from '@/base/progress-circle/progress-circle'
 // import {playMode} from '@/common/js/config'
 // import Lyric from '@/lyric-parser'
@@ -115,7 +119,8 @@ const transform = prefixStyle('transform');
 export default {
   data() {
     return {
-      songReady: false
+      songReady: false,
+      currentTime: 0,   // 当前时间
     }
   },
   computed: {
@@ -144,6 +149,12 @@ export default {
     disableCls() {
       return this.songReady ? '' : 'disable'
     },
+
+    // 进度条
+    percent(){
+      // 歌曲播放的比例 = 当前播放的时间 / 歌曲总时长
+      return this.currentTime / this.currentSong.duration
+    }
   },
   created() {
   },
@@ -295,10 +306,38 @@ export default {
     // 既保证了正常使用，又防止用户快速点击，造成dom报错
     error(){
       this.songReady = true;
+    },
+
+    updateTime(e){
+      // e.target.currentTime表示了一个audio当前播放的时间，可读写
+      console.log(e.target.currentTime,"ck");
+      this.currentTime = e.target.currentTime;
+    },
+
+    // 转时间戳为日期格式
+    format(interval){
+      interval = interval | 0;   // ｜ 0 操作符一个正数向下取整 相当于 Math.floor()
+      // 获取分的部分
+      const minute = interval / 60 | 0;
+      // 获取秒的部分
+      const second = this._pad(interval % 60);
+      return `${minute}:${second}`
+    },
+
+    // 格式转化，让时间0:1变成0:01;
+    // 很多语言有padLfet，在字符串后面补0
+    _pad(num, n = 2){
+      let len = num.toString().length;
+      while(len < n){
+        num = '0' + num;
+        len++;
+      }
+       return num
     }
   },
   components: {
-    // Playlist
+    // Playlist,
+    ProgressBar
   }
 }
 </script>
