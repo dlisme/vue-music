@@ -48,7 +48,7 @@
             <span class="time time-l">{{format(currentTime)}}</span>
             <!-- 歌曲进度条 -->
             <div class="progress-bar-wrapper">
-              <progress-bar :percent="percent"></progress-bar>
+              <progress-bar :percent="percent" @percentChange="onProgressBarChange"></progress-bar>
             </div>
             <!-- 歌曲播放总时间 -->
             <span class="time time-r">{{format(currentSong.duration)}}</span>
@@ -333,7 +333,15 @@ export default {
         len++;
       }
        return num
-    }
+    },
+
+    // 拖动释放 跳转到相应位置
+    onProgressBarChange(precent){
+      this.$refs.audio.currentTime = this.currentSong.duration * percent;
+      if(!this.playing){
+        this.togglePlaying();
+      }
+   }
   },
   components: {
     // Playlist,
