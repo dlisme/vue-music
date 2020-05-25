@@ -96,7 +96,11 @@
       // 点击跳转到相应位置
       progressClick(e){
         // 设置偏移量
-        this._offset(e.offsetX);
+        // 当我们点击progressBtn的时候，e.offsetX获取不对
+        const rect = this.$refs.progressBar.getBoundingClientRect();
+        const offsetWidth = e.pageX - rect.left;
+        this._offset(offsetWidth);
+        // this._offset(e.offsetX);
         this._triggerPercent();
       }
 

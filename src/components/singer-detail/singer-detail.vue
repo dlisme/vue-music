@@ -11,7 +11,7 @@
 import MusicList from '@/components/music-list/music-list'
 import {getSingerDetail} from '@/api/singer'
 import {ERR_OK} from '@/api/config'
-import {createSong} from '@/common/js/song'
+import {createSong, processSongsUrl} from '@/common/js/song'
 import {mapGetters} from 'vuex' // 取数据
 
 export default {
@@ -42,8 +42,9 @@ export default {
       }
       getSingerDetail(this.singer.id).then((res) => {
         if(res.code === ERR_OK){
-          this.songs = this._nomalizeSongs(res.data.list);
-          console.log(this.songs,"lp");
+          processSongsUrl(this._nomalizeSongs(res.data.list)).then((songs) => {
+            this.songs = songs;
+          });
         }
       })
     },

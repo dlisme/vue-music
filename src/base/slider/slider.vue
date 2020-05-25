@@ -4,7 +4,13 @@
       <slot> </slot>
     </div>
     <div class="dots">
-      <span class="dot" v-for="(item, index) in dots" :key="index" :class="{active:currentPageIndex === index}"> </span>
+      <span
+        class="dot"
+        v-for="(item, index) in dots"
+        :key="index"
+        :class="{ active: currentPageIndex === index }"
+      >
+      </span>
     </div>
   </div>
 </template>
@@ -31,7 +37,7 @@ export default {
   data() {
     return {
       dots: [],
-      currentPageIndex: 0
+      currentPageIndex: 0,
     };
   },
   mounted() {
@@ -39,18 +45,18 @@ export default {
       this._setSliderWidth();
       this._initSlider();
       this._initDots();
-      if(this.autoPlay){
+      if (this.autoPlay) {
         this.play();
       }
     }, 20);
 
-    window.addEventListener('resize', () => {
-      if(!this.slider){
-        return
+    window.addEventListener("resize", () => {
+      if (!this.slider) {
+        return;
       }
       this._setSliderWidth(true);
       this.slider.refresh();
-    })
+    });
   },
   activated() {},
   deactivated() {},
@@ -88,33 +94,33 @@ export default {
         },
       });
 
-      this.slider.on('scrollEnd', () => {
+      this.slider.on("scrollEnd", () => {
         let pageIndex = this.slider.getCurrentPage().pageX;
         // if(this.loop){
         //   pageIndex -= 1
         // }
         this.currentPageIndex = pageIndex;
-        if(this.autoPlay){
+        if (this.autoPlay) {
           clearTimeout(this.timer);
           this.play();
         }
-      })
+      });
     },
-    
+
     // 自动播放
-    play(){
+    play() {
       let pageIndex = this.currentPageIndex + 1;
-      if(this.loop){
+      if (this.loop) {
         pageIndex += 1;
       }
       this.timer = setTimeout(() => {
         this.slider.goToPage(pageIndex, 0, 400);
-      },this.interval)
-    }
+      }, this.interval);
+    },
   },
   destroyed() {
     clearTimeout(this.timer);
-  }
+  },
 };
 </script>
 
