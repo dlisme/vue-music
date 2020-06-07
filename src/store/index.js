@@ -7,6 +7,7 @@ import state from './state'
 import mutations from './mutations'
 // import createLogger from 'vuex/dist/logger'
 
+
 Vue.use(Vuex)
 
 // 开发环境使用，线上模式不使用

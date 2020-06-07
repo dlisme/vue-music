@@ -161,11 +161,11 @@ export default {
     },
 
     refresh() {
-      this.$refs.listview.refresh()
+      this.$refs.listview.refresh();
     },
 
     scroll(pos) {
-      this.scrollY = pos.y
+      this.scrollY = pos.y;
     },
 
     _calculateHeight() {

@@ -75,3 +75,7 @@ export function processSongsUrl (songs) {
     return songs
   })
 }
+
+export function isValidMusic (musicData) {
+  return musicData.songid && musicData.albummid && (!musicData.pay || musicData.pay.payalbumprice === 0)
+}

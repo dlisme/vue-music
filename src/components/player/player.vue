@@ -31,8 +31,9 @@
                 <img class="image" :src="currentSong.image" />
               </div>
             </div>
+            <!-- cd页歌词滚动部分 -->
             <div class="playing-lyric-wrapper">
-              <div class="playing-lyric"></div>
+              <div class="playing-lyric">{{ playingLyric }}</div>
             </div>
           </div>
           <!-- 歌词 -->
@@ -46,7 +47,7 @@
                 <p
                   ref="lyricLine"
                   class="text"
-                  :class="{ 'current': currentLineNum === index }"
+                  :class="{ current: currentLineNum === index }"
                   v-for="(line, index) in currentLyric.lines"
                   :key="index"
                 >
@@ -59,10 +60,10 @@
         <!-- cd 歌词切换小圆点 -->
         <div class="bottom">
           <div class="dot-wrapper">
-            <span class="dot" :class="{ 'active': currentShow === 'cd' }"></span>
+            <span class="dot" :class="{ active: currentShow === 'cd' }"></span>
             <span
               class="dot"
-              :class="{ 'active': currentShow === 'lyric' }"
+              :class="{ active: currentShow === 'lyric' }"
             ></span>
           </div>
           <div class="progress-wrapper">
@@ -220,10 +221,13 @@ export default {
         return
       }
       // audio标签有一个play方法
-      this.$nextTick(() => {
+      if(this.currentLyric){
+        this.currentLyric.stop();
+      }
+      setTimeout(() => {
         this.$refs.audio.play();
         this.getLyric();
-      })
+      }, 1000)
     },
 
     // 真正控制音乐播放器暂停
@@ -322,6 +326,9 @@ export default {
         return
       }
       this.setPlayingState(!this.playing);
+      if(this.currentLyric){
+        this.currentLyric.togglePlay();
+      }
     },
 
     // 上一首
@@ -330,13 +337,17 @@ export default {
       if(!this.songReady){
         return
       }
-      let index = this.currentIndex - 1;
-      if(index === -1){
-        index = this.playlist.length - 1;
-      }
-      this.setCurrentIndex(index);
-      if(!this.playing){
-        this.togglePlaying();
+      if(this.playlist.length === 1){
+        this.loop();
+      } else {
+        let index = this.currentIndex - 1;
+        if(index === -1){
+          index = this.playlist.length - 1;
+        }
+        this.setCurrentIndex(index);
+        if(!this.playing){
+          this.togglePlaying();
+        }
       }
       this.songReady = false;
     },
@@ -347,15 +358,20 @@ export default {
       if(!this.songReady){
         return
       }
-      let index = this.currentIndex + 1;
-      if(index === this.playlist.length){
-        //  顺序播放
-        index = 0;
+      if(this.playlist.length === 1){
+        this.loop();
+      } else {
+        let index = this.currentIndex + 1;
+        if(index === this.playlist.length){
+          //  顺序播放
+          index = 0;
+        }
+        this.setCurrentIndex(index);
+        if(!this.playing){
+          this.togglePlaying();
+        }
       }
-      this.setCurrentIndex(index);
-      if(!this.playing){
-        this.togglePlaying();
-      }
+
       this.songReady = false;
     },
 
@@ -372,9 +388,12 @@ export default {
     loop(){
       this.$refs.audio.currentTime = 0;
       this.$refs.audio.play();
+      if(this.currentLyric){
+        this.currentLyric.seek(0);
+      }
     },
 
-    // 
+    //
     ready(){
       this.songReady = true;
     },
@@ -419,6 +438,10 @@ export default {
       if(!this.playing){
         this.togglePlaying();
       }
+      // 歌词和歌曲保持一致
+      if(this.currentLyric){
+        this.currentLyric.seek(currentTime * 1000);
+      }
    },
 
     //  改变播放模式
@@ -455,7 +478,11 @@ export default {
         if(this.playing){
           this.currentLyric.play();
         }
-        console.log(this.currentLyric,"ki");
+      }).catch(() => {
+        // 获取不到歌词的时候
+        this.currentLyric = null;
+        this.playingLyric = '';
+        this.currentLineNum = 0;
       })
     },
 
@@ -468,8 +495,8 @@ export default {
       } else {
         this.$refs.lyricList.scrollTo(0, 0, 1000);
       }
-      console.log(txt);
-
+      // 展示当前播放的歌词
+      this.playingLyric = txt;
     },
 
     // 实现左右移动效果
@@ -506,7 +533,7 @@ export default {
     },
 
     // 移动结束
-    middleTouchEnd(e){
+    middleTouchEnd(){
       let offsetWidth;
       let opacity;
       if(this.currentShow === 'cd'){

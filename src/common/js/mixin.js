@@ -1,3 +1,4 @@
+// 就是把这段js放在同一个地方去写，如果组件用了mixin，它就会把代码添加到组件里
 import {mapGetters, mapMutations, mapActions} from 'vuex'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
@@ -9,14 +10,14 @@ export const playlistMixin = {
     ])
   },
   mounted() {
-    this.handlePlaylist(this.playlist)
+    this.handlePlaylist(this.playlist);
   },
   activated() {
-    this.handlePlaylist(this.playlist)
+    this.handlePlaylist(this.playlist);
   },
   watch: {
     playlist(newVal) {
-      this.handlePlaylist(newVal)
+      this.handlePlaylist(newVal);
     }
   },
   methods: {

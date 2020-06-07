@@ -24,7 +24,7 @@ export function shuffle(arr){
   // 遍历arr
   for(let i=0; i<_arr.length; i++){
     // 0 到 i取一个索引，把这个索引对应的_arr i 交换，将数组打乱
-    let j = getRandomInt(0, j);
+    let j = getRandomInt(0, i);  // j换成i修改随机播放bug
     let t = _arr[i];
     _arr[i] = _arr[j];
     _arr[j] = t;

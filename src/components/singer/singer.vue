@@ -1,6 +1,6 @@
 <template>
-  <div class="singer">
-    <list-view :data="singers" @select="selectSinger"></list-view>
+  <div class="singer" ref="singer">
+    <list-view :data="singers" @select="selectSinger" ref="list"></list-view>
     <router-view></router-view>
   </div>
 </template>
@@ -11,10 +11,12 @@ import { ERR_OK } from "@/api/config";
 import Singer from "@/common/js/singer";
 import ListView from "@/base/listview/listview";
 import { mapMutations } from "vuex";
+import {playlistMixin} from '@/common/js/mixin'
 
 const HOT_SINGER_LEN = 10;
 const HOT_NAME = "热门";
 export default {
+  mixins: [playlistMixin],
   data() {
     return {
       singers: [],
@@ -24,6 +26,15 @@ export default {
     this._getSingerList();
   },
   methods: {
+    // 用了mixin必须使用handlePlaylist这个方法,
+    // 如果播放器遮挡住了底部，计算距离底部的距离，如果有播放器就距离底部60，没有就0
+    handlePlaylist(playlist){
+      const bottom = playlist.length > 0 ? '60px' : '';
+      this.$refs.singer.style.bottom = bottom;
+      this.$refs.list.refresh();
+    },
+
+
     selectSinger(singer) {
       this.$router.push({
         path: `/singer/${singer.id}`,
@@ -98,10 +109,9 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-// .singer
-//   position fixed
-//   top 88px
-//   bottom 0
-//   width 100%
-//   z-index: 999
+.singer
+  position fixed
+  top 88px
+  bottom 0
+  width 100%
 </style>

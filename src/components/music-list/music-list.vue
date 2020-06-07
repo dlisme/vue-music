@@ -23,7 +23,7 @@
       @scroll="scroll"
     >
       <div class="song-list-wrapper">
-        <song-list :songs="songs" @select="selectItem"></song-list>
+        <song-list :songs="songs" :rank="rank" @select="selectItem"></song-list>
       </div>
       <div class="loading-container" v-show="!songs.length">
         <loading></loading>
@@ -37,12 +37,16 @@ import Scroll from '@/base/scroll/scroll'
 import Loading from '@/base/loading/loading'
 import SongList from '@/base/song-list/song-list'
 import {prefixStyle} from '@/common/js/dom'
-// import {playlistMixin} from '@/common/js/mixin'
+import {playlistMixin} from '@/common/js/mixin'
 import {mapActions} from 'vuex'
+
 const RESERVED_HEIGHT = 40;
 const transform = prefixStyle('transform');
 const backdrop = prefixStyle('backdrop-filter');
+
 export default {
+  // 插入mixin, 代码进入组件，组件同名的方法可以覆盖掉mixin里面的方法，如methods, watch
+  mixins: [playlistMixin],
   props: {
     bgImage: {
       type: String,
@@ -59,6 +63,10 @@ export default {
     title: {
       type: String,
       default: ''
+    },
+    rank: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -81,6 +89,14 @@ export default {
     this.$refs.list.$el.style.top = `${this.imageHeigt}px`
   },
   methods: {
+    // 用了mixin必须使用handlePlaylist这个方法,
+    // 如果播放器遮挡住了底部，计算距离底部的距离，如果有播放器就距离底部60，没有就0
+    handlePlaylist(playlist){
+      const bottom = playlist.length > 0 ? '60px' : '';
+      this.$refs.list.$el.style.bottom = bottom;
+      this.$refs.list.refresh();
+    },
+
     scroll(pos){
       this.scrollY = pos.y;
     },
