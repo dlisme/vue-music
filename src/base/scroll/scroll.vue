@@ -11,18 +11,24 @@ export default {
   props: {
     probeType: {
       type: Number,
-      default: 1,
+      default: 1
     },
     click: {
       type: Boolean,
-      default: true,
+      default: true
     },
     data: {
       type: Array,
-      default: null,
+      default: null
     },
-    // 让scroll监听滚动事件与否 
+    // 让scroll监听滚动事件与否
     listenScroll: {
+      type: Boolean,
+      default: false
+    },
+
+    // 上拉加载
+    pullup: {
       type: Boolean,
       default: false
     }
@@ -43,13 +49,21 @@ export default {
       }
       this.scroll = new BScroll(this.$refs.wrapper, {
         probeType: this.probeType,
-        click: this.click,
+        click: this.click
       });
 
-      if(this.listenScroll){
+      if (this.listenScroll) {
         let me = this;
-        this.scroll.on('scroll', (pos) => {
-          me.$emit('scroll', pos)
+        this.scroll.on("scroll", pos => {
+          me.$emit("scroll", pos);
+        });
+      }
+
+      if (this.pullup) {
+        this.scroll.on('scrollEnd', ()=>{
+          if(this.scroll.y <= (this.scroll.maxScrollY + 50)) {
+            this.$emit('scrollToEnd');
+          }
         })
       }
     },
@@ -69,16 +83,16 @@ export default {
     },
     scrollToElement() {
       this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments);
-    },
+    }
   },
   watch: {
     data() {
       setTimeout(() => {
         this.refresh();
       }, 20);
-    },
+    }
   },
-  components: {},
+  components: {}
 };
 </script>
 

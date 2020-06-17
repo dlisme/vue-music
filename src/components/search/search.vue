@@ -1,9 +1,9 @@
 <template>
   <div class="search">
     <div class="search-box-wrapper">
-      <search-box ref="searchBox"></search-box>
+      <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
-    <div ref="shortcutWrapper" class="shortcut-wrapper">
+    <div ref="shortcutWrapper" class="shortcut-wrapper" v-show="!query">
       <scroll class="shortcut">
         <div>
           <div class="hot-key">
@@ -26,8 +26,8 @@
         </div>
       </scroll>
     </div>
-    <div class="search-result" ref="searchResult">
-      <!-- <suggest ref="suggest"></suggest> -->
+    <div class="search-result" ref="searchResult" v-show="query">
+      <suggest ref="suggest" :query="query"></suggest>
     </div>
     <!-- <confirm ref="confirm"></confirm> -->
     <router-view></router-view>
@@ -39,7 +39,7 @@
   // import SearchList from '@/base/search-list/search-list'
   import Scroll from '@/base/scroll/scroll'
   // import Confirm from '@/base/confirm/confirm'
-  // import Suggest from '@/components/suggest/suggest'
+  import Suggest from '@/components/suggest/suggest'
   import {getHotKey} from '@/api/search'
   import {ERR_OK} from '@/api/config'
   // import {playlistMixin, searchMixin} from '@/common/js/mixin'
@@ -48,7 +48,8 @@
 export default {
   data() {
     return {
-      hotKey: []
+      hotKey: [],
+      query: ''
     };
   },
   created() {
@@ -67,11 +68,16 @@ export default {
     addQuery(query){
       // console.log("lk");
       this.$refs.searchBox.setQuery(query);
+    },
+
+    onQueryChange(query){
+      this.query = query;
     }
   },
   components: {
     SearchBox,
-    Scroll
+    Scroll,
+    Suggest
   },
 };
 </script>

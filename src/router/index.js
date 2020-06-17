@@ -41,7 +41,11 @@ const routes = [
   },
   {
     path: "/search",
-    component: Search
+    component: Search,
+    children: [{
+      path: ':id',  // :id以id为变量，可以传入不同的id值，可以跳到不同的子路由，渲染不同的歌手详情页
+      component: SingerDetail
+    }]
   },
 ];
 
