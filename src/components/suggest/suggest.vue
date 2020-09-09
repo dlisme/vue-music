@@ -1,6 +1,6 @@
 <template>
   <!--  搜索里面的检索结果 -->
-  <scroll ref="suggest" class="suggest" :data="result" :pullup="pullup" @scrollToEnd="searchMore">
+  <scroll ref="suggest" class="suggest" :data="result" :pullup="pullup" :beforeScroll="beforeScroll" @scrollToEnd="searchMore" @beforeScroll = "listSCroll">
     <ul class="suggest-list">
       <li class="suggest-item" v-for="(item, index) in result" :key="index" @click="selectItem(item)">
         <div class="icon">
@@ -12,8 +12,8 @@
       </li>
       <loading v-show="hasMore" title=""></loading>
     </ul>
-    <div class="no-result-wrapper">
-      <!-- <no-result title="抱歉，暂无搜索结果"></no-result> -->
+    <div class="no-result-wrapper" v-show="!hasMore && !result.length">
+      <no-result title="抱歉，暂无搜索结果"></no-result>
     </div>
   </scroll>
 </template>
@@ -21,7 +21,7 @@
 <script type="text/ecmascript-6">
 import Scroll from "@/base/scroll/scroll";
 import Loading from '@/base/loading/loading'
-// import NoResult from '@/base/no-result/no-result'
+import NoResult from '@/base/no-result/no-result'
 import { search } from "@/api/search";
 import { ERR_OK } from "@/api/config";
 import { createSong, isValidMusic, processSongsUrl } from "@/common/js/song";
@@ -47,7 +47,8 @@ export default {
       page: 1,
       result: [],
       pullup: true,
-      hasMore: true
+      hasMore: true,
+      beforeScroll: true
     };
   },
 
@@ -159,6 +160,10 @@ export default {
       return ret;
     },
 
+    listSCroll(){
+      this.$emit('listSCroll')
+    },
+
     _checkMore(data) {
       const song = data.song;
       if (
@@ -180,7 +185,7 @@ export default {
   components: {
     Scroll,
     Loading,
-    // NoResult
+    NoResult
   }
 };
 </script>
