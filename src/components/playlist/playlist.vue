@@ -4,20 +4,20 @@
       <div class="list-wrapper" @click.stop>
         <div class="list-header">
           <h1 class="title">
-            <i class="icon"></i>
-            <span class="text"></span>
-            <span class="clear"><i class="icon-clear"></i></span>
+            <i class="icon" :class="iconMode" @click="changeMode"></i>
+            <span class="text">{{modeText}}</span>
+            <span class="clear" @click="showConfirm"><i class="icon-clear"></i></span>
           </h1>
         </div>
         <scroll ref="listContent"  class="list-content" :data="sequenceList">
           <transition-group ref="list" name="list" tag="ul">
-            <li class="item" v-for="(item,index) in sequenceList" :key="index" @click="selectItem(item,index)">
+            <li class="item" ref="listItem" v-for="(item,index) in sequenceList" :key="item.id" @click="selectItem(item,index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
               <span class="like">
                 <i></i>
               </span>
-              <span class="delete">
+              <span class="delete" @click.stop="deleteOne(item)">
                 <i class="icon-delete"></i>
               </span>
             </li>
@@ -33,38 +33,61 @@
           <span>关闭</span>
         </div>
       </div>
-      <confirm ref="confirm" text="是否清空播放列表" confirmBtnText="清空"></confirm>
+      <confirm ref="confirm" text="是否清空播放列表" confirmBtnText="清空" @confirm="confirmClear"></confirm>
       <add-song ref="addSong"></add-song>
     </div>
   </transition>
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapActions, mapGetters, mapMutations} from 'vuex'
+  import {mapActions} from 'vuex'  
+  // 后封装到mixin里面
+  // import {mapActions, mapGetters, mapMutations} from 'vuex'  
   import {playMode} from 'common/js/config'
   import Scroll from 'base/scroll/scroll'
   import Confirm from 'base/confirm/confirm'
   // import AddSong from 'components/add-song/add-song'
-  // import {playerMixin} from 'common/js/mixin'
+  import {playerMixin} from 'common/js/mixin'
 
   export default {
+    mixins: [playerMixin],
     data() {
       return {
         showFlag: false
       }
     },
+
+    // 后封装到mixin里面
+    // computed: {
+    //   ...mapGetters([
+    //     'sequenceList',
+    //     'currentSong',
+    //     'playlist',
+    //     'mode'
+    //   ])
+    // },
+
     computed: {
-      ...mapGetters([
-        'sequenceList',
-        'currentSong',
-        'playlist'
-      ])
+      modeText(){
+        return this.mode === playMode.sequence ? '顺序播放' : this.mode === playMode.random ? '随机播放' : '单曲循环'
+      }
+
+    },
+
+    watch:{
+      currentSong(newSong,oldSong){
+        if(!this.showFlag || newSong.id === oldSong.id){
+          return
+        }
+        this.scrollToCurrent(newSong)
+      } 
     },
     methods: {
       show(){
         this.showFlag = true;
         setTimeout(() => {
           this.$refs.listContent.refresh()
+          this.scrollToCurrent(this.currentSong)
         }, 20)
       },
 
@@ -72,7 +95,7 @@
         this.showFlag = false;
       },
 
-      getCurrentIcon(){
+      getCurrentIcon(item){
         if(this.currentSong.id === item.id){
           return 'icon-play'
         }
@@ -86,11 +109,42 @@
           })
         }
         this.setCurrentIndex(index)
+        this.setPlayingState(true)
       },
 
-      ...mapMutations({
-        setCurrentIndex: 'SET_CURRENT_INDEX'
-      })
+      scrollToCurrent(current){
+        const index = this.sequenceList.findIndex((song) =>{
+          return current.id === song.id
+        })
+        this.$refs.listContent.scrollToElement(this.$refs.listItem[index],300)
+      },
+
+      // 后封装到mixin里面
+      // ...mapMutations({
+      //   setCurrentIndex: 'SET_CURRENT_INDEX',
+      //   setPlayingState: 'SET_PLAYING_STATE'
+      // }),
+
+      ...mapActions([
+        'deleteSong',
+        'deleteSongList'
+      ]),
+
+      deleteOne(item){
+        this.deleteSong(item);
+        if(!this.playlist.length){
+          this.hide();
+        }
+      },
+
+      showConfirm(){
+        this.$refs.confirm.show();
+      },
+
+      confirmClear(){
+        this.deleteSongList();
+        this.hide();
+      }
 
     },
     components: {

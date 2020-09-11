@@ -4,32 +4,18 @@
 // 3、在一个动作中提交多个mutation（多次改变mutation），就可以将此封装，如点开歌曲列表，歌曲开始播放且歌词滚动且中间的唱片图开始滚动等等等
 // 4、actions调用也是在组件中调用
 
-import * as types from './mutation-types'
-import {
-  playMode
-} from '@/common/js/config'
-import {
-  shuffle
-} from '@/common/js/util'
-import {
-  saveSearch,
-  deleteSearch,
-  clearSearch
-} from '@/common/js/cache'
+import * as types from "./mutation-types";
+import { playMode } from "@/common/js/config";
+import { shuffle } from "@/common/js/util";
+import { saveSearch, deleteSearch, clearSearch } from "@/common/js/cache";
 
 function findIndex(list, song) {
   return list.findIndex((item) => {
-    return item.id === song.id
-  })
+    return item.id === song.id;
+  });
 }
 // 定义一个动作  选择播放
-export const selectPlay = function ({
-  commit,
-  state
-}, {
-  list,
-  index
-}) {
+export const selectPlay = function({ commit, state }, { list, index }) {
   commit(types.SET_SEQUENCE_LIST, list);
   if (state.mode === playMode.random) {
     let randomList = shuffle(list);
@@ -42,14 +28,10 @@ export const selectPlay = function ({
   commit(types.SET_CURRENT_INDEX, index);
   commit(types.SET_FULL_SCREEN, true);
   commit(types.SET_PLAYING_STATE, true);
-}
+};
 
 // 随机播放
-export const randomPlay = function ({
-  commit
-}, {
-  list
-}) {
+export const randomPlay = function({ commit }, { list }) {
   commit(types.SET_PLAY_MODE, playMode.random);
   commit(types.SET_SEQUENCE_LIST, list);
   let randomList = shuffle(list);
@@ -57,13 +39,10 @@ export const randomPlay = function ({
   commit(types.SET_CURRENT_INDEX, 0);
   commit(types.SET_FULL_SCREEN, true);
   commit(types.SET_PLAYING_STATE, true);
-}
+};
 
 // 搜索
-export const insertSong = function ({
-  commit,
-  state
-}, song) {
+export const insertSong = function({ commit, state }, song) {
   let playlist = state.playlist.slice();
   let sequenceList = state.sequenceList.slice();
   let currentIndex = state.currentIndex;
@@ -104,16 +83,47 @@ export const insertSong = function ({
   commit(types.SET_CURRENT_INDEX, currentIndex);
   commit(types.SET_FULL_SCREEN, true);
   commit(types.SET_PLAYING_STATE, true);
+};
+
+export const saveSearchHistory = function({ commit }, query) {
+  commit(types.SET_SEARCH_HISTORY, saveSearch(query));
+};
+
+export const deleteSearchHistory = function({ commit }, query) {
+  commit(types.SET_SEARCH_HISTORY, deleteSearch(query));
+};
+
+export const clearSearchHistory = function({ commit }) {
+  commit(types.SET_SEARCH_HISTORY, clearSearch());
+};
+
+export const deleteSong = function({ commit, state }, song) {
+  let playlist = state.playlist.slice();
+  let sequenceList = state.sequenceList.slice();
+  let currentIndex = state.currentIndex;
+  let pIndex = findIndex(playlist, song);
+  playlist.splice(pIndex, 1);
+  let sIndex = findIndex(sequenceList, song);
+  sequenceList.splice(sIndex, 1);
+  if (currentIndex > pIndex || currentIndex === playlist.length) {
+    currentIndex--;
+  }
+  commit(types.SET_PLAYLIST, playlist);
+  commit(types.SET_SEQUENCE_LIST, sequenceList);
+  commit(types.SET_CURRENT_INDEX, currentIndex);
+  // if (!playlist.length) {
+  //   commit(types.SET_PLAYING_STATE, false);
+  // } else {
+  //   commit(types.SET_PLAYING_STATE, true);
+  // }
+  //  优化如下
+  const playingState = playlist.length > 0;
+  commit(types.SET_PLAYING_STATE, playingState)
+};
+
+export const deleteSongList = function({commit}){
+  commit(types.SET_PLAYLIST,[]);
+  commit(types.SET_SEQUENCE_LIST,[]);
+  commit(types.SET_CURRENT_INDEX, -1);
+  commit(types.SET_PLAYING_STATE, false);
 }
-
-export const saveSearchHistory = function ({ commit }, query) {
-  commit(types.SET_SEARCH_HISTORY, saveSearch(query))
-} 
-
-export const deleteSearchHistory = function ({ commit }, query) {
-  commit(types.SET_SEARCH_HISTORY, deleteSearch(query))
-} 
-
-export const clearSearchHistory = function ({ commit }) {
-  commit(types.SET_SEARCH_HISTORY, clearSearch())
-} 
