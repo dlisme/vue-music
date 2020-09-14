@@ -1,5 +1,6 @@
 import { playMode } from "@/common/js/config";
-import { loadSearch } from "@/common/js/cache";
+// 初始值读的时候从缓存里面读取
+import { loadSearch, loadPlay } from "@/common/js/cache";
 
 const state = {
   singer: {},
@@ -11,7 +12,8 @@ const state = {
   currentIndex: -1,  //  当前播放的索引
   disc: {},      // 歌单对象
   topList: {},      // 排行榜
-  searchHistory: loadSearch()   // 搜索历史
+  searchHistory: loadSearch(),   // 搜索历史
+  playHistory: loadPlay()
 };
 
 export default state;

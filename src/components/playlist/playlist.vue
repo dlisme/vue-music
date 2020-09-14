@@ -24,7 +24,7 @@
           </transition-group>
         </scroll>
         <div class="list-operate">
-          <div class="add">
+          <div class="add" @click="addSong">
             <i class="icon-add"></i>
             <span class="text">添加歌曲到队列</span>
           </div>
@@ -46,7 +46,7 @@
   import {playMode} from 'common/js/config'
   import Scroll from 'base/scroll/scroll'
   import Confirm from 'base/confirm/confirm'
-  // import AddSong from 'components/add-song/add-song'
+  import AddSong from 'components/add-song/add-song'
   import {playerMixin} from 'common/js/mixin'
 
   export default {
@@ -144,13 +144,17 @@
       confirmClear(){
         this.deleteSongList();
         this.hide();
+      },
+
+      addSong(){
+        this.$refs.addSong.show();
       }
 
     },
     components: {
       Scroll,
       Confirm,
-      // AddSong
+      AddSong
     }
   }
 </script>

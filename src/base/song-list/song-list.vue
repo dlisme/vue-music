@@ -39,6 +39,7 @@ export default {
       return `${song.singer} - ${song.album}`
     },
     selectItem(item, index){
+      console.log(this.songs,"一路向北");
       this.$emit('select', item, index);
     },
 

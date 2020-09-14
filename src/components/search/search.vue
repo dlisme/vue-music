@@ -9,8 +9,13 @@
           <div class="hot-key">
             <h1 class="title">热门搜索</h1>
             <ul>
-              <li class="item" v-for="(item,index) in hotKey" :key="index" @click="addQuery(item.k)">
-                <span>{{item.k}}</span>
+              <li
+                class="item"
+                v-for="(item, index) in hotKey"
+                :key="index"
+                @click="addQuery(item.k)"
+              >
+                <span>{{ item.k }}</span>
               </li>
             </ul>
           </div>
@@ -21,15 +26,29 @@
                 <i class="icon-clear"></i>
               </span>
             </h1>
-            <search-list :searches="searchHistory" @select="addQuery" @delete="deleteOne" ></search-list>
+            <search-list
+              :searches="searchHistory"
+              @select="addQuery"
+              @delete="deleteOne"
+            ></search-list>
           </div>
         </div>
       </scroll>
     </div>
     <div class="search-result" ref="searchResult" v-show="query">
-      <suggest ref="suggest" :query="query" @listSCroll="blurInput" @select="saveSearch"></suggest>
+      <suggest
+        ref="suggest"
+        :query="query"
+        @listSCroll="blurInput"
+        @select="saveSearch"
+      ></suggest>
     </div>
-    <confirm ref="confirm" text="是否清空所有搜索历史" confirmBtnText="清空" @confirm="clearSearchHistory"></confirm>
+    <confirm
+      ref="confirm"
+      text="是否清空所有搜索历史"
+      confirmBtnText="清空"
+      @confirm="clearSearchHistory"
+    ></confirm>
     <router-view></router-view>
   </div>
 </template>
@@ -43,14 +62,18 @@
   import {getHotKey} from '@/api/search'
   import {ERR_OK} from '@/api/config'
   import {playlistMixin, searchMixin} from '@/common/js/mixin'
-  import {mapActions, mapGetters} from 'vuex'
+  // 后封装到mixin里面
+  import {mapActions} from 'vuex'
+  // import {mapActions, mapGetters} from 'vuex'
 
 export default {
-  mixins: [playlistMixin],
+  mixins: [playlistMixin,searchMixin],
   data() {
     return {
       hotKey: [],
-      query: ''
+
+  // 后封装到mixin里面
+      // query: ''
     };
   },
   created() {
@@ -70,9 +93,10 @@ export default {
       return this.hotKey.concat(this.searchHistory)
     },
 
-    ...mapGetters([
-      'searchHistory'
-    ])
+  // 后封装到mixin里面
+    // ...mapGetters([
+    //   'searchHistory'
+    // ])
   },
   methods: {
     handlePlaylist(playlist){
@@ -91,11 +115,11 @@ export default {
       })
     },
 
-    addQuery(query){
-      // console.log("lk");
-      console.log(this.searchHistory,"lp");
-      this.$refs.searchBox.setQuery(query);
-    },
+  // 后封装到mixin里面
+    // addQuery(query){
+    //   console.log(this.searchHistory,"lp");
+    //   this.$refs.searchBox.setQuery(query);
+    // },
 
     deleteOne(item){
       this.deleteSearchHistory(item);
@@ -105,27 +129,33 @@ export default {
       this.$refs.confirm.show();
     },
 
+  // 后封装到mixin里面
     // deleteAll(){
     //   this.clearSearchHistory();
     // },
 
-    onQueryChange(query){
-      this.query = query;
-    },
-    
-    blurInput(){
-      this.$refs.searchBox.blur();
-    },
+  // 后封装到mixin里面
+    // onQueryChange(query){
+    //   this.query = query;
+    // },
+
+  // 后封装到mixin里面
+    // blurInput(){
+    //   this.$refs.searchBox.blur();
+    // },
 
     ...mapActions([
-      'saveSearchHistory',
-      'deleteSearchHistory',
+  // 后封装到mixin里面
+      // 'saveSearchHistory',
+      // 'deleteSearchHistory',
       'clearSearchHistory'
     ]),
-    saveSearch(){
-      this.saveSearchHistory(this.query);
-    }
-    
+
+  // 后封装到mixin里面
+    // saveSearch(){
+    //   this.saveSearchHistory(this.query);
+    // }
+
 
   },
   components: {

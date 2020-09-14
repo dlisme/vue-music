@@ -141,7 +141,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import {mapGetters, mapMutations} from 'vuex'
+import {mapActions, mapGetters, mapMutations} from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixStyle} from '@/common/js/dom'
 import ProgressBar from '@/base/progress-bar/progress-bar'   //  progress-bar 进度条
@@ -324,6 +324,10 @@ export default {
       // setPlaylist: 'SET_PLAYLIST',
     }),
 
+    ...mapActions([
+      'savePlayHistory'
+    ]),
+
     // 控制是否暂停播放  图标
     togglePlaying(){
       // 阻止快速点击报错，在歌曲还没ready，不允许点击
@@ -401,6 +405,7 @@ export default {
     //
     ready(){
       this.songReady = true;
+      this.savePlayHistory(this.currentSong);
     },
 
     // 如果用户切换遇到网络错误，url报错等问题。后续操作没法执行 error
