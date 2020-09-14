@@ -19,7 +19,7 @@
               </song-list>
             </div>
           </scroll>
-          <scroll  ref="searchList" class="list-scroll" v-if="currentIndex===1" :data="searchHistory">
+          <scroll :refreshDelay="refreshDelay"  ref="searchList" class="list-scroll" v-if="currentIndex===1" :data="searchHistory">
             <div class="list-inner">
               <search-list @delete="deleteSearchHistory" @select="addQuery" :searches="searchHistory"></search-list>
             </div>
@@ -29,12 +29,12 @@
       <div class="search-result" v-show="query">
         <suggest :query="query" :showSinger="showSinger" @select="selectSuggest" @listScroll="blurInput"></suggest>
       </div>
-      <!-- <top-tip ref="topTip">
+      <top-tip ref="topTip">
         <div class="tip-title">
           <i class="icon-ok"></i>
           <span class="text">1首歌曲已经添加到播放列表</span>
         </div>
-      </top-tip> -->
+      </top-tip>
     </div>
   </transition>
 </template>
@@ -45,7 +45,7 @@
   import SearchList from 'base/search-list/search-list'
   import Scroll from 'base/scroll/scroll'
   import Switches from 'base/switches/switches'
-  // import TopTip from 'base/top-tip/top-tip'
+  import TopTip from 'base/top-tip/top-tip'
   import Suggest from 'components/suggest/suggest'
   import {searchMixin} from 'common/js/mixin'
   import {mapGetters, mapActions} from 'vuex'
@@ -58,6 +58,7 @@
         showFlag: false,
         // 后封装到mixin里面
         // query: '',
+        refreshDelay: 100,
         showSinger: false,
         currentIndex: 0,
         switches: [
@@ -76,7 +77,7 @@
       show(){
         this.showFlag = true;
         setTimeout(() => {
-          if(this.currentIndex = 0){
+          if(this.currentIndex === 0){
             this.$refs.songList.refresh();
           } else {
             this.$refs.searchList.refresh();
@@ -94,6 +95,7 @@
 
       selectSuggest(){
         this.saveSearch();
+        this.showTip();
       },
 
       switchItem(index){
@@ -102,8 +104,13 @@
 
       selectSong(song, index){
         if(index !== 0){
-          this.insertSong(new Song(song))
+          this.insertSong(new Song(song));
+          this.showTip();
         }
+      },
+
+      showTip(){
+        this.$refs.topTip.show();
       },
 
       ...mapActions([
@@ -118,7 +125,7 @@
       SearchList,
       Scroll,
       Switches,
-      // TopTip,
+      TopTip,
       Suggest
     }
   }
