@@ -16,7 +16,9 @@
     props: {
       searches: {
         type: Array,
-        default: []
+        default: () => {
+          return []
+        }
       }
     },
     methods: {

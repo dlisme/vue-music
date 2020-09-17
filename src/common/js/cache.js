@@ -1,3 +1,4 @@
+// 保存到本地缓存中
 import storage from 'good-storage'
 
 const SEARCH_KEY = '__search__'
@@ -82,7 +83,7 @@ export function saveFavorite(song) {
 export function deleteFavorite(song) {
   let songs = storage.get(FAVORITE_KEY, [])
   deleteFromArray(songs, (item) => {
-    return item.id === song.id
+    return song.id === item.id
   })
   storage.set(FAVORITE_KEY, songs)
   return songs
