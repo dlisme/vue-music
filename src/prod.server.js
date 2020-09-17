@@ -1,6 +1,10 @@
 // 启动服务
 // 本地资源编译打包
 // 路由蓝加载，异步加载，优化
+
+// v-console
+// mac 抓包工具  charles
+// window fiddler 抓包工具
 var express = require('express')
 var compression = require('compression')
 var config = require('./config/index')
