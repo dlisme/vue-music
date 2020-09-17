@@ -11,6 +11,13 @@ import UserCenter from '@/components/user-center/user-center'
 
 Vue.use(VueRouter);
 
+// const Recommend = ((resolve) => {
+//   import('components/recommend/recommend').then((recommend) => {
+//     resolve(recommend)
+//   })
+// })
+// 组件按需异步加载，文件变小
+
 const routes = [
   {
     path: "/",
