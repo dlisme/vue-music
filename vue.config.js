@@ -7,6 +7,7 @@ function resolve(dir) {
 }
 
 module.exports = {
+  publicPath: process.env.NODE_ENV === "production" ? "/vue-music/" : "/",
   devServer: {
     before(app) {
       app.get("/api/getDiscList", function(req, res) {
