@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@better-scroll/core": "^2.0.0-beta.6",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
     "better-scroll": "^1.15.2",
